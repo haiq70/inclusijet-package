@@ -140,8 +140,8 @@ def dijet_sigma_dDelta_y(Delta_y:float, type:str="pp", epsabs:float=1e-4, epsrel
     """
 
     # Set limits for Y integration
-    Y_min = -Y_MAX + abs(Delta_y)/2
-    Y_max = Y_MAX - abs(Delta_y)/2
+    Y_min = -Y_MAX + np.abs(Delta_y)/2
+    Y_max = Y_MAX - np.abs(Delta_y)/2
 
     # Set limits for pT integration
     pt_min = PT_MIN

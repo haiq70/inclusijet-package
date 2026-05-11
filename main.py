@@ -165,8 +165,8 @@ def calculate_dps_ratio(N:int=30000):
     """
     logger.info(f"Running Monte Carlo integration for DPS ratio calculations w/ N={N}...")
 
-    sigma_pp = double_dijet_sigma_total(N, type="pp")
-    sigma_pPb = double_dijet_sigma_total(N, type="pPb")
+    sigma_pp, _ = double_dijet_sigma_total(N, type="pp")
+    sigma_pPb, _ = double_dijet_sigma_total(N, type="pPb")
 
     return sigma_pPb/(A*sigma_pp)
 

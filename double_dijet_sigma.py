@@ -143,7 +143,7 @@ def double_dijet_sigma_Delta_y_max(N:int, n_bins:int, y_range_min:float, y_range
     return comp * result * CONV_GEV_NB, bin_centres
 
 
-def double_dijet_sigma_total(N:int, type:str="pp") -> float:
+def double_dijet_sigma_total(N:int, type:str="pp") -> tuple:
     """
     Performing a complete Monte Carlo integration over the rapidity and transverse momentum differentials in dsigma/dy1dy2dy3dy4dpt12dpt22, returning the total cross section for the DPS of two protons or a proton and a neutron into four jets.
     The algorithm is precisely the same as in double_dijet_sigma_Delta_y_max, but instead of producing a histogram in terms of rapidity differences, the function simply calculates the mean of the integrand samples, normalised through the number of points and the integration phase space. 
@@ -153,6 +153,7 @@ def double_dijet_sigma_total(N:int, type:str="pp") -> float:
     :param type: string representing the type of the interaction, i.e. either "pp" (default) or "pPb"
 
     :returns result: Monte Carlo value of the cross section in nb
+    :returns err: error estimate of the cross section in nb
     """
 
     # Sample the phase space in a random fashion
@@ -181,6 +182,9 @@ def double_dijet_sigma_total(N:int, type:str="pp") -> float:
     comp = 1/2
 
     # Estimate the Monte Carlo cross section expressed in nb
-    result = volume/N * np.mean(dsigma, dtype=float) * CONV_GEV_NB * comp
+    result = volume * comp *  np.mean(dsigma, dtype=float) * CONV_GEV_NB
 
-    return result
+    # Estimate the error in the result
+    err = volume * comp / np.sqrt(N) * np.std(dsigma) * CONV_GEV_NB
+
+    return result, err
