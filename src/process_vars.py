@@ -2,7 +2,7 @@ import lhapdf
 
 SQRT_S = 7000 # Centre-of-mass energy in GeV
 S = SQRT_S**2 # in GeV^2
-SIGMA_EFF = 15.0 * 2.56819 # Effective pp cross-section in GeV^{-2} (15 mb)
+SIGMA_EFF = 15 * 2.56819 # Effective pp cross-section in GeV^{-2} (15 mb)
 
 # Convert GeV^{-2} to nb
 CONV_GEV_NB = 3.89379e5

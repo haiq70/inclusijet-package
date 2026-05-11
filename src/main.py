@@ -173,19 +173,6 @@ def calculate_dps_ratio(N:int=30000):
 
 # --- Main execution ---
 def main() -> None:
-    
-    # y_range_min = 4.0
-    # y_range_max = 9.3
-    # type = "pp"
-
-    # # Range of rapidity differences
-    # Delta_y = np.arange(y_range_min, y_range_max, 0.1, dtype=float)
-
-    # Plot the cross section of SPS and DPS in pp collisions
-    # plot_sigma(Delta_y, type=type)
-
-    # Plot jets or dps ratio
-    #plot_ratio(ratio_type="dps")
 
     # Calculate the DPS ratio
     dps_ratio = calculate_dps_ratio()
