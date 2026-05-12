@@ -1,4 +1,5 @@
 ## Description
+
 The following is an implementation of the calculation of the contribution of double parton scattering (DPS) to the leading-order cross section for four-jet production in proton-proton and proton-nucleus collisions. The main flow of the programme is to first compute the single parton scattering cross section for production of two jets, to be treated as two separate hard processes, in the implementation of the "pocket formula" for DPS into 4 jets. Moreover, in order to estimate the extent of this effect in proton-nucleus collisions, the functions used in the proton-proton case are characterised by a degree of generality, with a possible input representing the nucleon interacting with the proton in the course of the collision.
 
 The mathematical treatment employed in this package follows from ~ J. F. Owens' "Large momentum-transfer production of direct photons, jets, and particles", where the cross section for the process $AB \rightarrow \text{2 jets}$ takes the following form
@@ -16,6 +17,27 @@ The sum in the above expression are performed over all nucleons in the nucleus $
 The specific proton-nucleus interaction treated in this implementation is the proton-lead (A=208) collision, utilising CT18ANLO free proton PDFs and EPPS21 nuclear PDFs, encompassed in the pre-compiled LHAPDF Python library.
 
 ## Package structure
+
+│   .gitignore
+│   README.md
+│
+└───src
+    │   main.py
+    │
+    ├───setup
+    │   │   alpha_s.py
+    │   │   load_pdf.py
+    │   │   partonic_sigma.py
+    │   │   process_vars.py
+    │
+    ├───sigma
+    │   │   dijet_sigma.py
+    │   │   double_dijet_sigma.py
+    │   │   jet_overlap_sigma.py
+ 
+ 
+ The main codebase within `src/` is divided into two separate subfolders, `setup` and `sigma`. The former includes various prerequisite functionalities to be employed in the cross section calculations, encapsulated within the latter. Below, one may find a description of each of the files alongside their intended use:
+
 - `process_vars.py`: List of global variables, defining either the collision process, or the characteristics of the jets. Some of these variables, such as the min/max jet transverse momentum or max rapidity, are crucial for setting proper integration limits in the cross section computations. 
 
 - `load_pdf.py`: Module loading the parton distribution functions using the LHAPDF library and the specific set determined in `process_vars`.
@@ -30,4 +52,4 @@ The specific proton-nucleus interaction treated in this implementation is the pr
 
 - `jet_overlap_sigma.py`: Building on the differential DPS cross section, the function `injet_double_sigma_total` calculates the total cross section corresponding to finding jet 3 within jet 1. This is done by enforcing a Heaviside constraint, defining the original jet cone of radius $R$, and restoring angular-dependence of the expression by averaging over the azimuthal angles of the two involved jets. Adapting the previous approaches, the full integration is performed using a Monte Carlo method.
 
-- `main.py`: Main execution loop of the programme: included are functions visualising the results of the cross section calculation, based on various criteria. `plot_sigma()` produces a log-linear plot of the differential cross section, expressed in terms of rapidity separation for proton-proton collisions, in both DPS and SPS interactions. On the other hand, `plot_ratio()` calculates the ratio of 4-jet to 2-jet production in proton-proton and proton-lead collisions, plotting it on a common scale, quantifying the appearance of DPS effects in a nuclear environment. It also evaluates the ratio of 4-jet production in proton-lead versus proton-proton interactions, establishing the extent of nuclear modifications in the same process.
+- `main.py`: Main execution loop of the programme: included are functions visualising the results of the cross section calculation, based on various criteria. `plot_sigma()` produces a log-linear plot of the differential cross section, expressed in terms of rapidity separation for proton-proton collisions, in both DPS and SPS interactions. On the other hand, `plot_ratio()` calculates the ratio of 4-jet to 2-jet production in proton-proton and proton-lead collisions, plotting it on a common scale, quantifying the appearance of DPS effects in a nuclear environment. It also evaluates the DPS ratio of 4-jet production in proton-lead versus proton-proton interactions, establishing the extent of nuclear modifications in the same process.
