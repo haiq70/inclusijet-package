@@ -18,6 +18,7 @@ The specific proton-nucleus interaction treated in this implementation is the pr
 
 ## Package structure
 
+```
 │   .gitignore
 │   README.md
 │
@@ -34,9 +35,12 @@ The specific proton-nucleus interaction treated in this implementation is the pr
     │   │   dijet_sigma.py
     │   │   double_dijet_sigma.py
     │   │   jet_overlap_sigma.py
+ ```
  
+ The main codebase within `src/` is divided into two separate subfolders, `setup` and `sigma`. The former includes various prerequisite functionalities to be employed in the cross section calculations, encapsulated within the latter. 
  
- The main codebase within `src/` is divided into two separate subfolders, `setup` and `sigma`. The former includes various prerequisite functionalities to be employed in the cross section calculations, encapsulated within the latter. Below, one may find a description of each of the files alongside their intended use:
+ ### Individual file description
+ Below, one may find a description of each of the files alongside their intended use:
 
 - `process_vars.py`: List of global variables, defining either the collision process, or the characteristics of the jets. Some of these variables, such as the min/max jet transverse momentum or max rapidity, are crucial for setting proper integration limits in the cross section computations. 
 
