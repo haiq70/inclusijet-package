@@ -1,4 +1,4 @@
-from process_vars import MC_IDX, PDF_PROTON, PDF_NUCLEUS
+from setup.process_vars import MC_IDX, PDF_PROTON, PDF_NUCLEUS
 
 # --- Fast PDF loading ---
 def pdf_proton(parton:str, x:float, Q:float):

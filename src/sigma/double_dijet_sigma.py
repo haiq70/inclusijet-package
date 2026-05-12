@@ -1,6 +1,6 @@
-from dijet_sigma import dijet_sigma_dy1dy2dpt2
-from partonic_sigma import *
-from process_vars import SIGMA_EFF, PT_MIN, PT_MAX, Y_MAX, CONV_GEV_NB, A, Z, RA
+from sigma.dijet_sigma import dijet_sigma_dy1dy2dpt2
+from setup.partonic_sigma import *
+from setup.process_vars import SIGMA_EFF, PT_MIN, PT_MAX, Y_MAX, CONV_GEV_NB, A, Z, RA
 
 import numpy as np
 

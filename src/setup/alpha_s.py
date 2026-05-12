@@ -1,6 +1,6 @@
 import numpy as np
 
-from process_vars import PDF_PROTON_TITLE, PDF_PROTON, PDF_NUCLEUS_TITLE
+from setup.process_vars import PDF_PROTON_TITLE, PDF_PROTON, PDF_NUCLEUS_TITLE
 
 # --- Extract running alpha_s coupling value ---
 def alpha_s(Q2:float, nf:int=4, Lambda:float=0.342207) -> float:

@@ -1,5 +1,5 @@
-from double_dijet_sigma import double_dijet_sigma_dy1dy2dy3dy4pt12pt22, nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22
-from process_vars import PT_MIN, PT_MAX, Y_MAX, RADIUS, CONV_GEV_NB, A
+from sigma.double_dijet_sigma import double_dijet_sigma_dy1dy2dy3dy4pt12pt22, nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22
+from setup.process_vars import PT_MIN, PT_MAX, Y_MAX, RADIUS, CONV_GEV_NB, A
 
 import numpy as np
 

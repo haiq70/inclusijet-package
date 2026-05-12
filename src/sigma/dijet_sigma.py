@@ -3,10 +3,10 @@ from itertools import combinations
 from scipy.integrate import dblquad
 from collections.abc import Callable
 
-from process_vars import SQRT_S, S, FLAVOURS, QUARKS, ANTIQUARKS, ISOSPIN_MAP, Y_MAX, PT_MAX, PT_MIN, A, Z
-from partonic_sigma import *
-from load_pdf import pdf_proton, pdf_nucleus
-from alpha_s import alpha_s
+from setup.process_vars import SQRT_S, S, FLAVOURS, QUARKS, ANTIQUARKS, ISOSPIN_MAP, Y_MAX, PT_MAX, PT_MIN, A, Z
+from setup.partonic_sigma import *
+from setup.load_pdf import pdf_proton, pdf_nucleus
+from setup.alpha_s import alpha_s
 
 
 def dijet_sigma_dy1dy2dpt2(pt:float, y1:float, y2:float, type:str="pp", nucleon:str="p") -> tuple:

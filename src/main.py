@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 
-from dijet_sigma import dijet_sigma_dDelta_y
-from double_dijet_sigma import double_dijet_sigma_Delta_y_max, double_dijet_sigma_total
-from process_vars import Y_MAX, PT_MIN, PT_MAX, SQRT_S, PDF_PROTON_TITLE, PDF_NUCLEUS_TITLE, CONV_GEV_NB, A
+from sigma.dijet_sigma import dijet_sigma_dDelta_y
+from sigma.double_dijet_sigma import double_dijet_sigma_Delta_y_max, double_dijet_sigma_total
+from sigma.jet_overlap_sigma import injet_double_dijet_sigma_total
+from setup.process_vars import Y_MAX, PT_MIN, PT_MAX, SQRT_S, PDF_PROTON_TITLE, PDF_NUCLEUS_TITLE, CONV_GEV_NB, A
 
 plt.rcParams.update({
     "font.family":          "serif",
@@ -154,29 +155,45 @@ def plot_ratio(ratio_type:str="dps", y_range_min:float=0.0, y_range_max:float=9.
     plt.show()
 
 
-def calculate_dps_ratio(N:int=30000):
+def calculate_dps_ratio(N:int=30000, injet:bool=False, iters:int=5) -> float:
     """
-    Function calculating the DPS ratio in proton-lead and proton-proton collisions, based on the output of the Monte Carlo integration employed in double_dijet_sigma_total.
+    Function calculating the (injet) DPS ratio in proton-lead and proton-proton collisions, based on the output of the Monte Carlo integration employed in double_dijet_sigma_total.
     This is an alternative approach to the above plotting in rapidity space, simply producing a float type number for comparison through an integration over the entire available phase space.
 
     :param N: number of Monte Carlo samples to generate for each parameter in the integration scheme
+    :param injet: boolean expression evaluating whether the DPS ratio is to evaluated within the kinematic constraints corresponding to finding one of the jets within the other
+    :param iters: number of iterations over which to run the Monte Carlo integration over
 
     :returns: DPS ratio, normalised through the nucleon number of the nucleus A
     """
-    logger.info(f"Running Monte Carlo integration for DPS ratio calculations w/ N={N}...")
 
-    sigma_pp, _ = double_dijet_sigma_total(N, type="pp")
-    sigma_pPb, _ = double_dijet_sigma_total(N, type="pPb")
+    # Initialise the empty ratio list, to average over as the final result
+    dps_ratio = np.array([])
 
-    return sigma_pPb/(A*sigma_pp)
+    # Calculate the cross sections, total or injet-constrained
+    if not injet:
+        for i in range(iters):
+            logger.info(f"Running Monte Carlo integration (iter={i+1} of {iters}) for total DPS ratio calculations w/ N={N}...")
+            sigma_pp, _ = double_dijet_sigma_total(N, type="pp")
+            sigma_pPb, _ = double_dijet_sigma_total(N, type="pPb")
+            dps_ratio = np.append(dps_ratio, sigma_pPb/(A*sigma_pp))
+    elif injet:
+        for i in range(iters):
+            logger.info(f"Running Monte Carlo integration (iter={i+1} of {iters}) for injet DPS ratio calculations w/ N={N}...")
+            sigma_pp_injet, _ = injet_double_dijet_sigma_total(N, type="pp")
+            sigma_pPb_injet, _ = injet_double_dijet_sigma_total(N, type="pPb")
+            dps_ratio = np.append(dps_ratio, sigma_pPb_injet/(A*sigma_pp_injet))
+    else: raise ValueError("Unknown injet parameter...")
+
+    return np.mean(dps_ratio, dtype=float)
 
 
 # --- Main execution ---
 def main() -> None:
 
-    # Calculate the DPS ratio
-    dps_ratio = calculate_dps_ratio()
-    print(dps_ratio)
+    # Calculate the (injet) DPS ratio
+    dps_ratio_mean = calculate_dps_ratio(N=10000, injet=True, iters=3)
+    print(dps_ratio_mean)
 
 
 if __name__ == "__main__":
