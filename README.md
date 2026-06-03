@@ -26,12 +26,14 @@ The specific proton-nucleus interaction treated in this implementation is the pr
     │   main.py
     │
     ├───setup
+    |   |   __init__.py
     │   │   alpha_s.py
     │   │   load_pdf.py
     │   │   partonic_sigma.py
     │   │   process_vars.py
     │
     ├───sigma
+    |   |   __init__.py
     │   │   dijet_sigma.py
     │   │   double_dijet_sigma.py
     │   │   jet_overlap_sigma.py
