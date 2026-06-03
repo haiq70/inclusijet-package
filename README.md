@@ -10,7 +10,7 @@ where $f_{a,b/A,B}$ represent the distribution functions for partons $a$ or $b$ 
 
 The particular modelling chosen for the proton-nucleus collision follows ~ H-S. Shao's "Probing impact-parameter dependent nuclear parton densities from double parton scatterings in heavy-ion collisions". As a first approach, no spatial dependence of the nuclear parton distribution functions is assumed. Moreover, a hard-sphere framework is chosen for the modelling of the nucleon density. 
 
-$$ \frac{d\sigma^{\text{DPS}}_{Ap\rightarrow 4 \text{ jets}}}{dy_1dy_2dy_3dy_4dp_{T_1}^2dp_{T_2}^2} =  \sum_{N_1^A, N_2^A} \frac{d\sigma_{N_1^A p\rightarrow 2 \text{ jets}}}{dy_1dy_2dp_{T_1}^2} \frac{d\sigma_{N_2^Ap\rightarrow 2 \text{ jets}}}{dy_3dy_4dp_{T_2}^2} \left(\frac{\delta_{N_1^A N_2^A}}{\sigma_{\text{eff}}} + \frac{A-1}{A}\frac{9}{8\pi R_A^2}\right)$$
+$$ \frac{d\sigma^{\text{DPS}}_{Ap\rightarrow 4 \text{ jets}}}{dy_1dy_2dy_3dy_4dp_{T_A}^2dp_{T_B}^2} =  \sum_{N_1^A, N_2^A} \frac{d\sigma_{N_1^A p\rightarrow 2 \text{ jets}}}{dy_1dy_2dp_{T_A}^2} \frac{d\sigma_{N_2^Ap\rightarrow 2 \text{ jets}}}{dy_3dy_4dp_{T_B}^2} \left(\frac{\delta_{N_1^A N_2^A}}{\sigma_{\text{eff}}} + \frac{A-1}{A}\frac{9}{8\pi R_A^2}\right)$$
 
 The sum in the above expression are performed over all nucleons in the nucleus $A$. The term for which $N_1^A = N_2^A$ represent the 4-parton interaction in which two partons originate from a single nucleon inside the nucleus, whereas the one where $N_1^A \neq N_2^A$ signifies the situation where they stem from a combination of two individual nucleons, either proton-proton, neutron-neutron, proton-neutron, or neutron-proton.
 
@@ -52,7 +52,7 @@ The specific proton-nucleus interaction treated in this implementation is the pr
 
 - `dijet_sigma.py`: Calculating the single parton scattering contribution to the differential cross section for $pA \rightarrow 2\text{ jets}$, i.e. $d\sigma/dy_1 dy_2 dp_T^2$. Included is also an appropriate integration to express the differential cross section in terms of rapidity differences, for a range of transverse jet momentum values.
 
-- `double_dijet_sigma.py`: Using the factorised ansatz, the double parton scattering contribution is calculated, using pre-computed results from the single parton scattering in `dijet_sigma`, resulting in the quantity $d\sigma/dy_1dy_2dy_3dy_4dp_{T_1}^2dp_{T_2}^2$ Moreover, the result is integrated using a Monte Carlo scheme, to express the differential cross section in terms of maximal rapidity separation between the two most remote jets in the configuration, i.e. $d\sigma/d\Delta y$.
+- `double_dijet_sigma.py`: Using the factorised ansatz, the double parton scattering contribution is calculated, using pre-computed results from the single parton scattering in `dijet_sigma`, resulting in the quantity $d\sigma/dy_1dy_2dy_3dy_4dp_{T_A}^2dp_{T_B}^2$ Moreover, the result is integrated using a Monte Carlo scheme, to express the differential cross section in terms of maximal rapidity separation between the two most remote jets in the configuration, i.e. $d\sigma/d\Delta y$.
 
 - `jet_overlap_sigma.py`: Building on the differential DPS cross section, the function `injet_double_sigma_total` calculates the total cross section corresponding to finding jet 3 within jet 1. This is done by enforcing a Heaviside constraint, defining the original jet cone of radius $R$, and restoring angular-dependence of the expression by averaging over the azimuthal angles of the two involved jets. Adapting the previous approaches, the full integration is performed using a Monte Carlo method.
 
