@@ -4,37 +4,37 @@ SQRT_S = 7000 # Centre-of-mass energy in GeV
 S = SQRT_S**2 # in GeV^2
 SIGMA_EFF = 15 * 2.56819 # Effective pp cross-section in GeV^{-2} (15 mb)
 
-# Convert GeV^{-2} to nb
+# Factor used for conversion of GeV^{-2} to nb
 CONV_GEV_NB = 3.89379e5
 
-# Global Monte Carlo numbering scheme to refer to the partons
+# Global Monte Carlo numbering scheme to refer to the partons, used in the PDF loading
 MC_IDX = {
     "bbar": -5, "cbar": -4, "sbar": -3, "ubar": -2, "dbar": -1,
     "d": 1, "u": 2, "s": 3, "c": 4, "b": 5, 
     "g": 21
 }
 
-# Set up dictionary mapping for the action of isospin symmetry: takes desired neutron pdf parton input and maps to the corresponding proton pdf parton
+# Dictionary mapping for the action of isospin symmetry: takes desired neutron PDF parton input and maps to the corresponding proton PDF parton
 ISOSPIN_MAP = {"u": "d", "d": "u", "ubar": "dbar", "dbar": "ubar", "s": "s", "sbar": "sbar", "g": "g"}
 
-# Relevant partons to take into account in the calculation, evaluating PDFs/FFs
+# Partons relevant in the main calculations, evaluating PDFs and performing flavour sums
 QUARKS = ["u", "d", "s"]
 ANTIQUARKS = ["ubar", "dbar", "sbar"] 
 FLAVOURS = QUARKS + ANTIQUARKS + ["g"]
 
 
-# --- Jets ---
-# Assume a range of transverse momenta
+# --- Reconstructed Jet ---
+# Range of transverse momenta
 PT_MIN = 20
 PT_MAX = 40
 
 # Jet radius in angular space
 RADIUS = 0.4
 
-# Assume same rapidity range for the jets |y| < Y_MAX
+# Rapidity range for the jets, i.e. |y| < Y_MAX for individual jet constituents
 Y_MAX = 4.7
 
-# Lower transverse momentum cut variable in GeV, used to regulate the divergences in the cross section integral
+# Lower transverse momentum cut variable in GeV, used to regulate the divergences in the cross section integrals
 PT_CUT = 2.0
 # ---------
 
@@ -43,8 +43,7 @@ PT_CUT = 2.0
 A = 208
 Z = 82
 
-# Nuclear radius
-# 1 fm = 5.07 GeV^{-1}
+# Nuclear radius with 1 fm = 5.07 GeV^{-1}
 RA =  6.624 * 5.07 # GeV^{-1}
 # ---------------
 

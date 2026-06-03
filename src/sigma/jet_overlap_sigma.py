@@ -48,8 +48,8 @@ def injet_double_dijet_sigma_dPT(PT:float, N:int, type:str, pt_cut:float, radius
     dsigma = np.zeros(N, dtype=float)
 
     # Calculate the angles and momenta of the jet pairs, determined by momentum conservation condition
-    pt1 = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
-    pt2 = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
+    ptA = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
+    ptB = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
 
     # Ensure proper treatment of branch cuts in the inverse tangent
     phi1 = np.arctan2(2 * qt * np.sin(phi), PT + 2 * qt * np.cos(phi)) # (-pi, pi)
@@ -60,7 +60,7 @@ def injet_double_dijet_sigma_dPT(PT:float, N:int, type:str, pt_cut:float, radius
     # Cast Heaviside condition as a mask on the numpy arrays
     heaviside = (radius**2 - Delta_y**2 - Delta_phi**2) > 0
     # Include a physical cut on the momenta to eliminate singular behaviour of the cross section and account for detector acceptance 
-    physical = (pt1 >= pt_cut) & (pt2 >= pt_cut) & (pt1 <= PT) & (pt2 <= PT)
+    physical = (ptA >= pt_cut) & (ptB >= pt_cut) & (ptA <= PT) & (ptB <= PT)
 
     # Get index of array for iteration
     idx = np.where(heaviside & physical)[0]
@@ -69,8 +69,8 @@ def injet_double_dijet_sigma_dPT(PT:float, N:int, type:str, pt_cut:float, radius
     # Calculate only the values of the integrand which are nonzero; attempt to make the iteration more computationally efficient 
     for i in idx:
         # Calculate the integrand, with pre-factors and Delta_y-dependent volume factor included  
-        if type == "pp": dsigma[i] = 2/(np.pi) * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
-        elif type == "pPb": dsigma[i] = 2/(np.pi) * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
+        if type == "pp": dsigma[i] = 2/(np.pi) * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
+        elif type == "pPb": dsigma[i] = 2/(np.pi) * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
         else: raise ValueError("Unknown interaction type parameter...")
 
     # Assign a compensation factor due to jet permutations 1 <-> 2; this ensures that no double-counting is present in the Monte Carlo phase space
@@ -132,8 +132,8 @@ def injet_double_dijet_sigma_total(N:int, type:str, pt_cut:float, radius:float) 
     dsigma = np.zeros(N, dtype=float)
 
     # Calculate the angles and momenta of the jet pairs, determined by momentum conservation condition
-    pt1 = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
-    pt2 = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
+    ptA = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
+    ptB = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
 
     # Ensure proper treatment of branch cuts in the inverse tangent
     phi1 = np.arctan2(2 * qt * np.sin(phi), PT + 2 * qt * np.cos(phi)) # (-pi, pi)
@@ -144,7 +144,7 @@ def injet_double_dijet_sigma_total(N:int, type:str, pt_cut:float, radius:float) 
     # Cast Heaviside condition as a mask on the numpy arrays
     heaviside = (radius**2 - Delta_y**2 - Delta_phi**2) > 0
     # Include a physical cut on the momenta to eliminate singular behaviour of the cross section and account for detector acceptance 
-    physical = (pt1 >= pt_cut) & (pt2 >= pt_cut) & (pt1 <= PT) & (pt2 <= PT)
+    physical = (ptA >= pt_cut) & (ptB >= pt_cut) & (ptA <= PT) & (ptB <= PT)
 
     # Get index of array for iteration
     idx = np.where(heaviside & physical)[0]
@@ -153,8 +153,8 @@ def injet_double_dijet_sigma_total(N:int, type:str, pt_cut:float, radius:float) 
     # Calculate only the values of the integrand which are nonzero; attempt to make the iteration more computationally efficient 
     for i in idx:
         # Calculate the integrand, with pre-factors and Delta_y-dependent volume factor included  
-        if type == "pp": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
-        elif type == "pPb": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
+        if type == "pp": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
+        elif type == "pPb": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
         else: raise ValueError("Unknown interaction type parameter...")
 
     # Assign a compensation factor due to jet permutations 1 <-> 2; this ensures that no double-counting is present in the Monte Carlo phase space

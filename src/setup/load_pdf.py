@@ -5,7 +5,7 @@ def pdf_proton(parton:str, x:float, Q:float):
     """
     Return the proton PDF for a given parton at specified x, Q^2.
 
-    :param parton: name of the parton, consistent with the Monte Carlo scheme
+    :param parton: name of the parton, consistent with the Monte Carlo scheme MC_IDX
     :param x: momentum fraction variable
     :param Q: characteristic energy scale
 
@@ -18,7 +18,7 @@ def pdf_nucleus(parton:str, x:float, Q:float):
     """
     Return the nuclear PDF for a given parton at specified x, Q^2.
 
-    :param parton: name of the parton, consistent with the Monte Carlo scheme
+    :param parton: name of the parton, consistent with the Monte Carlo scheme MC_IDX
     :param x: momentum fraction variable
     :param Q: characteristic energy scale
 

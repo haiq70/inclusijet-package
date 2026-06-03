@@ -302,6 +302,8 @@ def plot_percentage_vs_radius(radii:np.ndarray, N_total:int=10_000, N_injet:int=
     plt.show()
 
 
+
+# --- Cross section loading ---
 def fetch_sigma(PT:float, N_injet:int=1_000_000, collision_type:str="pPb", radius:float=RADIUS, pt_cut:float=PT_CUT) -> float:
     """
     Function returning the differential injet cross section evluated with global parameters PT_CUT and RADIUS, defined for the purposes of multiprocessing.
@@ -346,6 +348,9 @@ def fetch_sigma_cut(pt_cut:float, radius:float=RADIUS, PT:float=30.0, N_injet:in
     """
     sigma_dPT, _ = injet_double_dijet_sigma_dPT(PT, N_injet, collision_type, pt_cut, radius)
     return sigma_dPT
+# -----------------------------
+
+
 
 def plot_differential_vs_momentum(PT:np.ndarray) -> None:
     """
@@ -368,7 +373,7 @@ def plot_differential_vs_momentum(PT:np.ndarray) -> None:
     with Pool(processes=(cpu_count()-1), maxtasksperchild=1) as pool:
         sigma_arr = np.array(pool.map(fetch_sigma, PT))
 
-    # Try fitting with an inverse quartic function and expected analyical behaviour with scipy
+    # Try fitting with an inverse quartic function and expected analyical behaviour with scipy; include also a parabola-like function
     popt, _ = curve_fit(quartic, PT, sigma_arr)
     popt_analytical, _ = curve_fit(analytical, PT, sigma_arr)
     popt_square, _ = curve_fit(square, PT, sigma_arr)
@@ -381,7 +386,7 @@ def plot_differential_vs_momentum(PT:np.ndarray) -> None:
     
     plt.scatter(PT, sigma_arr, color='k', label="Monte Carlo")
     plt.plot(PT, quartic(PT, *popt), color='red', label=f"fit quartic a={popt[0]:.2}, b={popt[1]:.2}")
-    #plt.plot(PT, analytical(PT, *popt_analytical), color='green', label=f"fit analytical a={popt_analytical[0]:.2}, b={popt_analytical[1]:.2}")
+    plt.plot(PT, analytical(PT, *popt_analytical), color='green', label=f"fit analytical a={popt_analytical[0]:.2}, b={popt_analytical[1]:.2}")
     plt.plot(PT, square(PT, *popt_square), color='blue', label=f"fit square a={popt_square[0]:.2}, b={popt[1]:.2}")
 
     plt.legend()
@@ -445,8 +450,6 @@ def plot_differential_vs_radius(radius:np.ndarray) -> None:
     plt.scatter(radius, dPT_sigma_arr, color='k', label="Monte Carlo")
     plt.plot(radius, func(radius, *popt_square), color='blue', label=f"fit a={popt_square[0]:.2}, b={popt_square[1]:.2}")
 
-    print(popt_square[0]/((-1)*4*popt_square[1]))
-
     plt.legend()
     plt.grid(alpha=0.4)
     plt.show() 
@@ -459,14 +462,17 @@ def plot_differential_vs_cut(pt_cut:np.ndarray) -> None:
     :param pt_cut: array of momentum cuts
     """
 
+    # Define the transverse momentum at which the cross section is evaluated
     PT = 30.0
 
+    # Define the function profiles for fitting
     def square(x:np.ndarray, a:float, b:float):
         return a/(PT**4*x**2) + b
 
     def func(x:np.ndarray, a:float, b:float):
         return a*(1/(PT**4 * x**2) + 6/(PT**5 * x) + 12/PT**6 * np.log(PT/x) - 7/PT**6) + b
 
+    # Use multiprocessing to split the tasks among CPUs
     with Pool(processes=(cpu_count() - 1), maxtasksperchild=1) as pool:
         dPT_sigma_arr = np.array(pool.map(fetch_sigma_cut, pt_cut))
 
@@ -487,7 +493,6 @@ def plot_differential_vs_cut(pt_cut:np.ndarray) -> None:
     plt.legend()
     plt.grid(alpha=0.4)
     plt.show() 
-
 
 
 

@@ -4,13 +4,13 @@ from setup.process_vars import SIGMA_EFF, PT_MIN, PT_MAX, Y_MAX, CONV_GEV_NB, A,
 
 import numpy as np
 
-def double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1:float, pt2:float, y1:float, y2:float, y3:float, y4:float, type:str="pp", nucleon_1:str="p", nucleon_2:str="p") -> float:
+def double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA:float, ptB:float, y1:float, y2:float, y3:float, y4:float, type:str="pp", nucleon_1:str="p", nucleon_2:str="p") -> float:
     """
     Compute the influence of double parton scattering to pA -> 4 jets using the factorisation ansatz. The implementation takes advantage of the dictionaries built in the calculation of the SPS cross section, to compare the 
     individual processes via their labels and assign a combinatorial factor of 1/2 to the total cross section if both the initial and final states are the same. Else, the factor remains unity.
 
-    :param pt1: transverse momentum of the first pair of jets
-    :param pt2: transverse momentum of the second pair of jets
+    :param ptA: transverse momentum of the first pair of jets
+    :param ptB: transverse momentum of the second pair of jets
     :param y1: jet 1 rapidity
     :param y2: jet 2 rapidity
     :param y3: jet 3 rapidity
@@ -23,8 +23,8 @@ def double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1:float, pt2:float, y1:float, y2:f
     """
 
     # Extract the SPS dicts
-    sub1, _ = dijet_sigma_dy1dy2dpt2(pt1, y1, y2, type, nucleon_1)
-    sub2, _ = dijet_sigma_dy1dy2dpt2(pt2, y3, y4, type, nucleon_2)
+    sub1, _ = dijet_sigma_dy1dy2dpt2(ptA, y1, y2, type, nucleon_1)
+    sub2, _ = dijet_sigma_dy1dy2dpt2(ptB, y3, y4, type, nucleon_2)
     
     
     # Loop through each subprocess
@@ -43,7 +43,7 @@ def double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1:float, pt2:float, y1:float, y2:f
     
     else: raise ValueError("Unknown collision type parameter...")
 
-def nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1:float, pt2:float, y1:float, y2:float, y3:float, y4:float) -> float:
+def nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA:float, ptB:float, y1:float, y2:float, y3:float, y4:float) -> float:
     """
     Evaluate the differential cross section for the double parton scattering pA -> 4 jets using modelling in arXiv:2001.04256v2, assuming no spatial dependence of the nuclear PDFs and using the hard-sphere model for the nucleon density.
     This implementation takes advantage of the above function double_dijet_sigma_dy1dy2dy3dy4pt12pt22 to compute the products of SPS scatterings.
@@ -63,15 +63,15 @@ def nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1:float, pt2:float, y1:flo
     
     # Extract the subsequent nucleon contributions
     # Two partons from one single nucleon inside the nucleus -- 2x proton or 2x neutron
-    sigma_same_pp = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="p") * Z
-    sigma_same_nn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="n") * (A-Z)
+    sigma_same_pp = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="p") * Z
+    sigma_same_nn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="n") * (A-Z)
 
     # Two partons from two different nucleons inside the nucleus -- 2x proton, 2x neutron, proton-neutron, neutron-proton
-    sigma_diff_pp = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="p") * Z * (Z-1)
-    sigma_diff_nn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="n") * (A-Z) * (A-Z-1)
+    sigma_diff_pp = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="p") * Z * (Z-1)
+    sigma_diff_nn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="n") * (A-Z) * (A-Z-1)
     # Note that for identical final states, the cross terms are the same
-    sigma_diff_np = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="p") * Z * (A-Z)
-    sigma_diff_pn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1, pt2, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="n") * Z * (A-Z)
+    sigma_diff_np = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="n", nucleon_2="p") * Z * (A-Z)
+    sigma_diff_pn = double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA, ptB, y1, y2, y3, y4, type="pPb", nucleon_1="p", nucleon_2="n") * Z * (A-Z)
     
 
     # Return the total cross section in GeV^{-6}
@@ -95,8 +95,8 @@ def double_dijet_sigma_Delta_y_max(N:int, n_bins:int, y_range_min:float, y_range
     """
     
     # Monte Carlo sampling based on the global limits
-    pt1 = np.random.uniform(PT_MIN, PT_MAX, N)
-    pt2 = np.random.uniform(PT_MIN, PT_MAX, N)
+    ptA = np.random.uniform(PT_MIN, PT_MAX, N)
+    ptB = np.random.uniform(PT_MIN, PT_MAX, N)
 
     y1 = np.random.uniform(-Y_MAX, Y_MAX, N)
     y2 = np.random.uniform(-Y_MAX, Y_MAX, N)
@@ -113,8 +113,8 @@ def double_dijet_sigma_Delta_y_max(N:int, n_bins:int, y_range_min:float, y_range
         Delta_y_max_vals.append(Delta_y_max)
 
         # Calculate the integrand
-        if type == "pp": dsigma = 2 * pt1[i] * 2 * pt2[i] * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1[i], pt2[i], y1[i], y2[i], y3[i], y4[i], type="pp", nucleon_1="p", nucleon_2="p")
-        elif type == "pPb": dsigma = 2 * pt1[i] * 2 * pt2[i] * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1[i], pt2[i], y1[i], y2[i], y3[i], y4[i])
+        if type == "pp": dsigma = 2 * ptA[i] * 2 * ptB[i] * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA[i], ptB[i], y1[i], y2[i], y3[i], y4[i], type="pp", nucleon_1="p", nucleon_2="p")
+        elif type == "pPb": dsigma = 2 * ptA[i] * 2 * ptB[i] * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(ptA[i], ptB[i], y1[i], y2[i], y3[i], y4[i])
         else: raise ValueError("Unknown collision type parameter...")
 
         dsigma_vals.append(dsigma)
@@ -188,11 +188,11 @@ def double_dijet_sigma_total(N:int, type:str, pt_cut:float) -> tuple:
     dsigma = np.zeros(N, dtype=float)
 
     # Calculate the angles and momenta of the jet pairs, determined by momentum conservation condition
-    pt1 = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
-    pt2 = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
+    ptA = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
+    ptB = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
 
     # Include a physical cut on the momenta to eliminate singular behaviour of the cross section
-    physical = (pt1 >= pt_cut) & (pt2 >= pt_cut)
+    physical = (ptA >= pt_cut) & (ptB >= pt_cut)
 
     # Get indices of array for iteration
     idx = np.where(physical)[0]
@@ -201,8 +201,8 @@ def double_dijet_sigma_total(N:int, type:str, pt_cut:float) -> tuple:
     # Calculate only the values of the integrand which are nonzero; attempt to make the iteration more computationally efficient 
     for i in idx:
         # Calculate the integrand, with pre-factors and Delta_y-dependent volume factor included  
-        if type == "pp": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
-        elif type == "pPb": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
+        if type == "pp": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
+        elif type == "pPb": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(ptA[i]), float(ptB[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
         else: raise ValueError("Unknown interaction type parameter...")
 
     # Assign a compensation factor due to jet permutations 1 <-> 2; this ensures that no double-counting is present in the Monte Carlo phase space
