@@ -3,7 +3,7 @@ from itertools import combinations
 from scipy.integrate import dblquad
 from collections.abc import Callable
 
-from setup.process_vars import SQRT_S, S, FLAVOURS, QUARKS, ANTIQUARKS, ISOSPIN_MAP, Y_MAX, PT_MAX, PT_MIN, A, Z
+from setup.process_vars import SQRT_S, S, FLAVOURS, QUARKS, ANTIQUARKS, ISOSPIN_MAP, Y_MAX, PT_MAX, PT_MIN, A, Z, PT_CUT, CONV_GEV_NB
 from setup.partonic_sigma import *
 from setup.load_pdf import pdf_proton, pdf_nucleus
 from setup.alpha_s import alpha_s
@@ -158,8 +158,75 @@ def dijet_sigma_dDelta_y(Delta_y:float, type:str="pp", epsabs:float=1e-4, epsrel
         elif type == "pPb": return 2 * pt * (Z * dijet_sigma_dy1dy2dpt2(pt, y1, y2, type="pPb", nucleon="p")[1] + (A-Z) * dijet_sigma_dy1dy2dpt2(pt, y1, y2, type="pPb", nucleon="n")[1])
         else: raise ValueError("Unknown collision type parameter...")
 
-    # Integrate outer integral over pt
+    # Integrate outer integral over pt and auxiliary Y
     integral = dblquad(integrand, pt_min, pt_max, Y_min, Y_max, epsabs=epsabs, epsrel=epsrel)
 
     # Return the result dsigma/dDelta_y in GeV^{-2}
     return integral[0]
+
+
+def dijet_sigma_dpt(pt:float, type:str="pPb", epsabs:float=1e-4, epsrel:float=1e-4):
+    """
+    Integration of the differential SPS dijet cross section to obtain it in terms of the total jet transverse momentum.
+
+    :param pt: jet transverse momentum
+    :param type: string representing the type of the interaction, i.e. either "pp" (default) or "pPb"
+    :param epsabs: absolute integration precision for dblquad (default = 1e-4)
+    :param epsrel: relative integration precision for dblquad (default = 1e-4)
+
+    :returns: scaled differential cross section 1/pt dsigma/dpt
+    """
+
+    # Define the function to integrate over the two jet rapidities 
+    def integrand(y1:float, y2:float):
+        if type == "pp": return 2 * dijet_sigma_dy1dy2dpt2(pt, y1, y2, type="pp", nucleon="p")[1]
+        elif type == "pPb": return 2 * (Z * dijet_sigma_dy1dy2dpt2(pt, y1, y2, type="pPb", nucleon="p")[1] + (A-Z) * dijet_sigma_dy1dy2dpt2(pt, y1, y2, type="pPb", nucleon="n")[1])
+        else: raise ValueError("Unknown collision type parameter...")
+
+    # Integrate over jet rapidities y1 and y2
+    integral = dblquad(integrand, -Y_MAX, Y_MAX, -Y_MAX, Y_MAX, epsabs=epsabs, epsrel=epsrel)
+
+    # Return the result 1/pt dsigma/dpt in GeV^{-4}
+    return integral[0]
+
+
+def dijet_sigma_total(N=5000, type:str="pPb", pt_cut:float=PT_CUT):
+    """
+    Monte Carlo integration of the SPS cross section over rapidities and jet pair transverse momentum.
+
+    :param N: number of Monte Carlo sample points
+    :param type: string representing the type of the interaction, i.e. either "pp" (default) or "pPb"
+    :param pt_cut: lower momentum cut used to regulate the divergence in the cross section
+
+    :returns result: Monte Carlo value of the cross section in nb
+    :returns err: error estimate of the cross section in nb
+    """
+
+    # Sample the space of integration variables 
+    y1 = np.random.uniform(-Y_MAX, Y_MAX, N)
+    y2 = np.random.uniform(-Y_MAX, Y_MAX, N)
+    pt = np.random.uniform(pt_cut, PT_MAX, N)
+
+    # Set up the integrand array
+    dsigma = np.zeros(N, dtype=float)
+
+    # Calculate the phase space volume
+    volume = (2*Y_MAX)**2 * (PT_MAX - pt_cut)
+
+    if type == "pp":
+        for i in range(N): dsigma[i] = 2 * pt[i] * dijet_sigma_dy1dy2dpt2(pt[i], y1[i], y2[i], type="pp", nucleon="p")[1]
+    elif type == "pPb": 
+        for i in range(N): dsigma[i] = 2 * pt[i] * (Z * dijet_sigma_dy1dy2dpt2(pt[i], y1[i], y2[i], type="pPb", nucleon="p")[1] + (A-Z) * dijet_sigma_dy1dy2dpt2(pt[i], y1[i], y2[i], type="pPb", nucleon="n")[1])
+    else: raise ValueError("Unknown collision type parameter...")
+
+    # Assign a compensation factor due to jet permutations 1 <-> 2; this ensures that no double-counting is present in the Monte Carlo phase space
+    comp = 1/2
+
+    # Estimate the Monte Carlo cross section expressed in nb
+    result = volume * comp *  np.mean(dsigma, dtype=float) * CONV_GEV_NB
+
+    # Estimate the error in the result
+    err = volume * comp / np.sqrt(N) * np.std(dsigma) * CONV_GEV_NB
+
+    return result, err
+

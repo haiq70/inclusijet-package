@@ -143,47 +143,74 @@ def double_dijet_sigma_Delta_y_max(N:int, n_bins:int, y_range_min:float, y_range
     return comp * result * CONV_GEV_NB, bin_centres
 
 
-def double_dijet_sigma_total(N:int, type:str="pp") -> tuple:
+def double_dijet_sigma_total(N:int, type:str, pt_cut:float) -> tuple:
     """
     Performing a complete Monte Carlo integration over the rapidity and transverse momentum differentials in dsigma/dy1dy2dy3dy4dpt12dpt22, returning the total cross section for the DPS of two protons or a proton and a neutron into four jets.
-    The algorithm is precisely the same as in double_dijet_sigma_Delta_y_max, but instead of producing a histogram in terms of rapidity differences, the function simply calculates the mean of the integrand samples, normalised through the number of points and the integration phase space. 
-    Note that the range of the integration is set by the global parameters, defined in the process_vars.py file. 
+    The algorithm mirrors the change of variables utilised in the case of in-jet cross sections, with PT = ptA + ptB, QT = 1/2 (ptA - ptB).
 
     :param N: number of random points to sample for each parameter
     :param type: string representing the type of the interaction, i.e. either "pp" (default) or "pPb"
+    :param pt_cut: minimum transverse momentum of a jet pair, used as a cut to regulate the divergences in the cross section
 
     :returns result: Monte Carlo value of the cross section in nb
     :returns err: error estimate of the cross section in nb
     """
-
-    # Sample the phase space in a random fashion
-    pt1 = np.random.uniform(PT_MIN, PT_MAX, N)
-    pt2 = np.random.uniform(PT_MIN, PT_MAX, N)
-
-    y1 = np.random.uniform(-Y_MAX, Y_MAX, N)
+    
+    # Sample the integration variables
+    # Observable jet variables
+    PT = np.random.uniform(PT_MIN, PT_MAX, N)
+    
+    # (Unconstrained) Rapidities 
     y2 = np.random.uniform(-Y_MAX, Y_MAX, N)
-    y3 = np.random.uniform(-Y_MAX, Y_MAX, N)
     y4 = np.random.uniform(-Y_MAX, Y_MAX, N)
+    
+    # (Unconstrained) Auxiliary momentum of the reconstructed jet
+    qt = np.random.uniform(0, PT_MAX, N)
 
-    # Calculate the phase space volume of integration
-    volume = (PT_MAX - PT_MIN)**2 * (2 * Y_MAX)**4 
+    # Azimuthal angle of the auxiliary transverse momentum variable (to be constrained using Heaviside)
+    phi = np.random.uniform(0, 2*np.pi, N)
 
-    # Initialise the arrays of the integrand results
-    dsigma = np.zeros(N)
+    # Rapidity separation between two relevant jets (to be constrained using Heaviside)
+    Delta_y = np.random.uniform(-2*Y_MAX, 2*Y_MAX, N)
+    
+    # (Unconstrained) Auxiliary rapidity variable with limits dependent on Delta_y
+    Y_lim = Y_MAX - np.abs(Delta_y)/2
+    Y = np.random.uniform(-1, 1, N) * Y_lim
 
-    # Use pp or pPb functions to evaluate the integrand, depending on the type parameter
-    if type == "pp":
-        for i in range(N): dsigma[i] = 2 * pt1[i] * 2 * pt2[i] * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1[i], pt2[i], y1[i], y2[i], y3[i], y4[i], type="pp", nucleon_1="p", nucleon_2="p")
-    elif type == "pPb":
-        for i in range(N): dsigma[i] = 2 * pt1[i] * 2 * pt2[i] * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(pt1[i], pt2[i], y1[i], y2[i], y3[i], y4[i])
-    else: raise ValueError("Unknown collision type parameter...")
+    # Get the constrained rapidities after change of variables
+    y1 = Y + Delta_y/2
+    y3 = Y - Delta_y/2
+
+    # Calculate the volume of integration phase space, excluding the terms dependent on the integration variables' values
+    volume = (2 * Y_MAX)**2 * (4*Y_MAX) * (2*np.pi) * (PT_MAX - PT_MIN) * (PT_MAX)
+
+    # Evaluate the integrands for the specified type of interactions
+    dsigma = np.zeros(N, dtype=float)
+
+    # Calculate the angles and momenta of the jet pairs, determined by momentum conservation condition
+    pt1 = np.sqrt(0.25 * PT**2 + qt**2 + PT * qt * np.cos(phi))
+    pt2 = np.sqrt(0.25 * PT**2 + qt**2 - PT * qt * np.cos(phi))
+
+    # Include a physical cut on the momenta to eliminate singular behaviour of the cross section
+    physical = (pt1 >= pt_cut) & (pt2 >= pt_cut)
+
+    # Get indices of array for iteration
+    idx = np.where(physical)[0]
+    print(len(idx))
+
+    # Calculate only the values of the integrand which are nonzero; attempt to make the iteration more computationally efficient 
+    for i in idx:
+        # Calculate the integrand, with pre-factors and Delta_y-dependent volume factor included  
+        if type == "pp": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]), type="pp", nucleon_1="p", nucleon_2="p")
+        elif type == "pPb": dsigma[i] = 2/(np.pi) * PT[i] * qt[i] * (2*Y_lim[i]) * nuclear_double_dijet_sigma_dy1dy2dy3dy4pt12pt22(float(pt1[i]), float(pt2[i]), float(y1[i]), float(y2[i]), float(y3[i]), float(y4[i]))
+        else: raise ValueError("Unknown interaction type parameter...")
 
     # Assign a compensation factor due to jet permutations 1 <-> 2; this ensures that no double-counting is present in the Monte Carlo phase space
     comp = 1/2
 
     # Estimate the Monte Carlo cross section expressed in nb
-    result = volume * comp *  np.mean(dsigma, dtype=float) * CONV_GEV_NB
-
+    result = volume * np.mean(dsigma, dtype=float) * CONV_GEV_NB * comp
+        
     # Estimate the error in the result
     err = volume * comp / np.sqrt(N) * np.std(dsigma) * CONV_GEV_NB
 
